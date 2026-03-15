@@ -19,105 +19,97 @@ import com.chaseoes.firstjoinplus.utilities.Utilities;
 public class FirstJoinListener implements Listener {
 
     @EventHandler
-    public void onFirstJoin(final FirstJoinEvent event) {
-        final Player player = event.getPlayer();
+    public void onFirstJoin(FirstJoinEvent event) {
+        Player player = event.getPlayer();
 
         if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.first-join-message.enabled")) {
             event.setFirstJoinMessage(Utilities.replaceVariables(FirstJoinPlus.getInstance().getConfig().getString("on-first-join.first-join-message.message"), player));
         }
 
-        FirstJoinPlus.getInstance().getServer().getScheduler().runTaskLater(FirstJoinPlus.getInstance(), new Runnable() {
-            public void run() {
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.teleport.enabled")) {
-                    player.teleport(event.getFirstJoinLocation());
-                }
+        FirstJoinPlus.getInstance().getServer().getScheduler().runTaskLater(FirstJoinPlus.getInstance(), () -> {
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.teleport.enabled")) {
+                player.teleport(event.getFirstJoinLocation());
+            }
 
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.first-join-kit.enabled")) {
-                    for (ItemStack i : Utilities.getFirstJoinKit()) {
-                        player.getInventory().addItem(i);
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.first-join-kit.enabled")) {
+                for (ItemStack i : Utilities.getFirstJoinKit()) {
+                    player.getInventory().addItem(i);
+                }
+            }
+
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.give-written-books.enabled")) {
+                for (ItemStack i : Utilities.getWrittenBooks(player)) {
+                    player.getInventory().addItem(i);
+                }
+            }
+
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.give-experience.enabled")) {
+                player.setLevel(FirstJoinPlus.getInstance().getConfig().getInt("on-first-join.give-experience.level-amount"));
+            }
+
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.send-messages.enabled")) {
+                for (String message : FirstJoinPlus.getInstance().getConfig().getStringList("on-first-join.send-messages.messages")) {
+                    player.sendMessage(Utilities.toComponent(Utilities.replaceVariables(message, player)));
+                }
+            }
+
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.fun-stuff.play-sound.enabled")) {
+                for (Player p : FirstJoinPlus.getInstance().getServer().getOnlinePlayers()) {
+                    if (p.hasPermission(FirstJoinPlus.getInstance().getConfig().getString("on-first-join.fun-stuff.play-sound.listen-permission"))) {
+                        Sound s = Sound.valueOf(FirstJoinPlus.getInstance().getConfig().getString("on-first-join.fun-stuff.play-sound.sound-name").toUpperCase());
+                        p.playSound(p.getLocation(), s, 1, 1);
                     }
                 }
+            }
 
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.give-written-books.enabled")) {
-                    for (ItemStack i : Utilities.getWrittenBooks(player)) {
-                        player.getInventory().addItem(i);
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.fun-stuff.smoke-effect.enabled")) {
+                event.getFirstJoinLocation().getWorld().spawnParticle(Particle.SMOKE, event.getFirstJoinLocation(), 25);
+            }
+
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.fun-stuff.launch-firework.enabled")) {
+                Utilities.launchRandomFirework(event.getFirstJoinLocation());
+            }
+
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.run-commands.enabled")) {
+                for (String command : FirstJoinPlus.getInstance().getConfig().getStringList("on-first-join.run-commands.commands")) {
+                    String cmnd = Utilities.replaceVariables(command, player);
+                    player.performCommand(cmnd);
+                }
+            }
+
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.run-console-commands.enabled")) {
+                for (String command : FirstJoinPlus.getInstance().getConfig().getStringList("on-first-join.run-console-commands.commands")) {
+                    String cmnd = Utilities.replaceVariables(command, player);
+                    FirstJoinPlus.getInstance().getServer().dispatchCommand(FirstJoinPlus.getInstance().getServer().getConsoleSender(), cmnd);
+                }
+            }
+
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.apply-potion-effects.enabled")) {
+                List<PotionEffect> effects = new ArrayList<>();
+                for (String s : FirstJoinPlus.getInstance().getConfig().getStringList("on-first-join.apply-potion-effects.effects")) {
+                    String[] effect = s.split("\\:");
+                    PotionEffectType type = Registry.EFFECT.get(NamespacedKey.minecraft(effect[0].toLowerCase()));
+                    if (type != null) {
+                        effects.add(new PotionEffect(type, Integer.parseInt(effect[2]) * 20, (Integer.parseInt(effect[1])) - 1));
+                    } else {
+                        FirstJoinPlus.getInstance().getLogger().warning("Unknown potion effect type: " + effect[0]);
                     }
                 }
+                player.addPotionEffects(effects);
+            }
 
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.give-experience.enabled")) {
-                    player.setLevel(FirstJoinPlus.getInstance().getConfig().getInt("on-first-join.give-experience.level-amount"));
-                }
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.modify-damage.disable-pvp.enabled")) {
+                int expire = FirstJoinPlus.getInstance().getConfig().getInt("on-first-join.modify-damage.disable-pvp.expire-after");
+                FirstJoinPlus.getInstance().noPVP.add(player.getName());
+                FirstJoinPlus.getInstance().getServer().getScheduler().runTaskLater(FirstJoinPlus.getInstance(),
+                        () -> FirstJoinPlus.getInstance().noPVP.remove(player.getName()), expire * 20L);
+            }
 
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.send-messages.enabled")) {
-                    for (String message : FirstJoinPlus.getInstance().getConfig().getStringList("on-first-join.send-messages.messages")) {
-                        player.sendMessage(Utilities.toComponent(Utilities.replaceVariables(message, player)));
-                    }
-                }
-
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.fun-stuff.play-sound.enabled")) {
-                    for (Player p : FirstJoinPlus.getInstance().getServer().getOnlinePlayers()) {
-                        if (p.hasPermission(FirstJoinPlus.getInstance().getConfig().getString("on-first-join.fun-stuff.play-sound.listen-permission"))) {
-                            Sound s = Sound.valueOf(FirstJoinPlus.getInstance().getConfig().getString("on-first-join.fun-stuff.play-sound.sound-name").toUpperCase());
-                            p.playSound(p.getLocation(), s, 1, 1);
-                        }
-                    }
-                }
-
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.fun-stuff.smoke-effect.enabled")) {
-                    event.getFirstJoinLocation().getWorld().spawnParticle(Particle.SMOKE, event.getFirstJoinLocation(), 25);
-                }
-
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.fun-stuff.launch-firework.enabled")) {
-                    Utilities.launchRandomFirework(event.getFirstJoinLocation());
-                }
-
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.run-commands.enabled")) {
-                    for (String command : FirstJoinPlus.getInstance().getConfig().getStringList("on-first-join.run-commands.commands")) {
-                        String cmnd = Utilities.replaceVariables(command, player);
-                        player.performCommand(cmnd);
-                    }
-                }
-
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.run-console-commands.enabled")) {
-                    for (String command : FirstJoinPlus.getInstance().getConfig().getStringList("on-first-join.run-console-commands.commands")) {
-                        String cmnd = Utilities.replaceVariables(command, player);
-                        FirstJoinPlus.getInstance().getServer().dispatchCommand(FirstJoinPlus.getInstance().getServer().getConsoleSender(), cmnd);
-                    }
-                }
-
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.apply-potion-effects.enabled")) {
-                    List<PotionEffect> effects = new ArrayList<PotionEffect>();
-                    for (String s : FirstJoinPlus.getInstance().getConfig().getStringList("on-first-join.apply-potion-effects.effects")) {
-                        String[] effect = s.split("\\:");
-                        PotionEffectType type = Registry.EFFECT.get(NamespacedKey.minecraft(effect[0].toLowerCase()));
-                        if (type != null) {
-                            effects.add(new PotionEffect(type, Integer.parseInt(effect[2]) * 20, (Integer.parseInt(effect[1])) - 1));
-                        } else {
-                            FirstJoinPlus.getInstance().getLogger().warning("Unknown potion effect type: " + effect[0]);
-                        }
-                    }
-                    player.addPotionEffects(effects);
-                }
-
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.modify-damage.disable-pvp.enabled")) {
-                    int expire = FirstJoinPlus.getInstance().getConfig().getInt("on-first-join.modify-damage.disable-pvp.expire-after");
-                    FirstJoinPlus.getInstance().noPVP.add(player.getName());
-                    FirstJoinPlus.getInstance().getServer().getScheduler().runTaskLater(FirstJoinPlus.getInstance(), new Runnable() {
-                        public void run() {
-                            FirstJoinPlus.getInstance().noPVP.remove(player.getName());
-                        }
-                    }, expire * 20L);
-                }
-
-                if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.modify-damage.god-mode.enabled")) {
-                    int expire = FirstJoinPlus.getInstance().getConfig().getInt("on-first-join.modify-damage.god-mode.expire-after");
-                    FirstJoinPlus.getInstance().godMode.add(player.getName());
-                    FirstJoinPlus.getInstance().getServer().getScheduler().runTaskLater(FirstJoinPlus.getInstance(), new Runnable() {
-                        public void run() {
-                            FirstJoinPlus.getInstance().godMode.remove(player.getName());
-                        }
-                    }, expire * 20L);
-                }
+            if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.modify-damage.god-mode.enabled")) {
+                int expire = FirstJoinPlus.getInstance().getConfig().getInt("on-first-join.modify-damage.god-mode.expire-after");
+                FirstJoinPlus.getInstance().godMode.add(player.getName());
+                FirstJoinPlus.getInstance().getServer().getScheduler().runTaskLater(FirstJoinPlus.getInstance(),
+                        () -> FirstJoinPlus.getInstance().godMode.remove(player.getName()), expire * 20L);
             }
         }, FirstJoinPlus.getInstance().getConfig().getInt("on-first-join.delay-everything-below-by"));
     }

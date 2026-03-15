@@ -1,22 +1,21 @@
 name: FirstJoinPlus
+version: '2.4.1'
 main: com.chaseoes.firstjoinplus.FirstJoinPlus
-version: 2.4.1
 description: FirstJoinPlus by chaseoes.
 api-version: '1.21'
-author: chaseoes
+authors:
+  - chaseoes
 website: http://dev.bukkit.org/server-mods/firstjoinplus/
-softdepend: [GeoIPTools]
-commands:
-  firstjoinplus:
-    description: FirstJoinPlus command(s).
-    aliases: fjp
-    usage: /firstjoinplus [reload|setspawn|debug]
 permissions:
   firstjoinplus.reload:
     description: Permission to use the /firstjoinplus reload command.
+    default: op
   firstjoinplus.setspawn:
     description: Permission to use the /firstjoinplus setspawn command.
+    default: op
   firstjoinplus.debug:
     description: Permission to use the /firstjoinplus debug command.
+    default: op
   firstjoinplus.notify:
     description: Permission to hear the first-join sound notification.
+    default: true

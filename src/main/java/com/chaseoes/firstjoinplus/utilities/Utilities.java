@@ -164,8 +164,8 @@ public class Utilities {
         string = string.replace("%player_name", player.getName());
         string = string.replace("%player_display_name", LegacyComponentSerializer.legacySection().serialize(player.displayName()));
         string = string.replace("%player_uuid", player.getUniqueId().toString());
-        string = string.replace("%player_country", GeoIPUtilities.getCountry(player));
-        string = string.replace("%player_city", GeoIPUtilities.getCity(player));
+        string = string.replace("%player_country", "N/A");
+        string = string.replace("%player_city", "N/A");
         string = string.replace("%total_players", getTotalPlayerCount() + "");
         string = string.replace("%random_player", getRandomPlayer().getName());
         string = string.replace("%random_player_display_name", LegacyComponentSerializer.legacySection().serialize(getRandomPlayer().displayName()));
@@ -195,9 +195,9 @@ public class Utilities {
                 .append(Component.text("You don't have permission to do that.", NamedTextColor.RED));
     }
 
-    @SuppressWarnings("deprecation")
     public static void copyDefaultFiles() {
-        FirstJoinPlus.getInstance().getConfig().options().header("FirstJoinPlus Version " + FirstJoinPlus.getInstance().getDescription().getVersion() + " Configuration -- Configuration Help: http://dev.bukkit.org/bukkit-plugins/firstjoinplus/ #");
+        FirstJoinPlus.getInstance().getConfig().options().setHeader(List.of("FirstJoinPlus Version " + FirstJoinPlus.getInstance().getDescription().getVersion() + " Configuration -- Configuration Help: http://dev.bukkit.org/bukkit-plugins/firstjoinplus/ #"));
+        FirstJoinPlus.getInstance().getConfig().options().parseComments(true);
         FirstJoinPlus.getInstance().getConfig().options().copyDefaults(true);
         FirstJoinPlus.getInstance().saveConfig();
 
