@@ -68,7 +68,9 @@ public class FirstJoinCommand {
                 .requires(source -> source.getSender() instanceof Player p && p.hasPermission("firstjoinplus.debug"))
                 .executes(ctx -> {
                     Player player = (Player) ctx.getSource().getSender();
-                    Utilities.resetPlayerState(player);
+                    if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.reset-state.enabled")) {
+                        Utilities.resetPlayerState(player);
+                    }
                     FirstJoinPlus.getInstance().getServer().getPluginManager().callEvent(
                             new FirstJoinEvent(new PlayerJoinEvent(player,
                                     Component.text(player.getName() + " joined for the first time!"))));
