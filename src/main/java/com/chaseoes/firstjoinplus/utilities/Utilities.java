@@ -32,12 +32,10 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 
-import com.chaseoes.firstjoinplus.FirstJoinEvent;
 import com.chaseoes.firstjoinplus.FirstJoinPlus;
 
 public class Utilities {
@@ -242,7 +240,7 @@ public class Utilities {
         }
     }
 
-    public static void debugPlayer(Player player, boolean b) {
+    public static void resetPlayerState(Player player) {
         player.getInventory().clear();
         player.getInventory().setHelmet(null);
         player.getInventory().setChestplate(null);
@@ -259,12 +257,6 @@ public class Utilities {
         player.setSaturation(0);
         player.closeInventory();
         player.setGameMode(FirstJoinPlus.getInstance().getServer().getDefaultGameMode());
-
-        if (b) {
-            FirstJoinPlus.getInstance().getServer().getPluginManager().callEvent(
-                    new FirstJoinEvent(new PlayerJoinEvent(player,
-                            Component.text(player.getName() + " joined for the first time!"))));
-        }
     }
 
 }

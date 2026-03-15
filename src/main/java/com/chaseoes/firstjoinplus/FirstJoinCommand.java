@@ -8,6 +8,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 @SuppressWarnings("UnstableApiUsage")
 public class FirstJoinCommand {
@@ -66,7 +67,11 @@ public class FirstJoinCommand {
             .then(Commands.literal("debug")
                 .requires(source -> source.getSender() instanceof Player p && p.hasPermission("firstjoinplus.debug"))
                 .executes(ctx -> {
-                    Utilities.debugPlayer((Player) ctx.getSource().getSender(), true);
+                    Player player = (Player) ctx.getSource().getSender();
+                    Utilities.resetPlayerState(player);
+                    FirstJoinPlus.getInstance().getServer().getPluginManager().callEvent(
+                            new FirstJoinEvent(new PlayerJoinEvent(player,
+                                    Component.text(player.getName() + " joined for the first time!"))));
                     return Command.SINGLE_SUCCESS;
                 })
             );
