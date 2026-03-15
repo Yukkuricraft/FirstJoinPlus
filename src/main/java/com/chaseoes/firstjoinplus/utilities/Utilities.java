@@ -14,14 +14,21 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
@@ -130,7 +137,7 @@ public class Utilities {
 
     public static void launchRandomFirework(Location location) {
         Random random = new Random();
-        Firework fw = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK);
+        Firework fw = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK_ROCKET);
         FireworkMeta meta = fw.getFireworkMeta();
 
         meta.setPower(1 + random.nextInt(4));
@@ -150,18 +157,18 @@ public class Utilities {
     }
 
     public static Player getRandomPlayer() {
-        return (Player) FirstJoinPlus.getInstance().getServer().getOnlinePlayers().toArray()[new Random().nextInt(FirstJoinPlus.getInstance().getServer().getOnlinePlayers().size())]; 
+        return (Player) FirstJoinPlus.getInstance().getServer().getOnlinePlayers().toArray()[new Random().nextInt(FirstJoinPlus.getInstance().getServer().getOnlinePlayers().size())];
     }
 
     public static String replaceVariables(String string, Player player) {
         string = string.replace("%player_name", player.getName());
-        string = string.replace("%player_display_name", player.getDisplayName());
+        string = string.replace("%player_display_name", LegacyComponentSerializer.legacySection().serialize(player.displayName()));
         string = string.replace("%player_uuid", player.getUniqueId().toString());
         string = string.replace("%player_country", GeoIPUtilities.getCountry(player));
         string = string.replace("%player_city", GeoIPUtilities.getCity(player));
         string = string.replace("%total_players", getTotalPlayerCount() + "");
         string = string.replace("%random_player", getRandomPlayer().getName());
-        string = string.replace("%random_player_display_name", getRandomPlayer().getDisplayName());
+        string = string.replace("%random_player_display_name", LegacyComponentSerializer.legacySection().serialize(getRandomPlayer().displayName()));
         string = string.replace("%new_line", "\n");
         return translateColors(string);
     }
@@ -174,18 +181,24 @@ public class Utilities {
         return ChatColor.translateAlternateColorCodes('&', string);
     }
 
-    public static String formatCommandResponse(String string) {
-        return ChatColor.YELLOW + "[FJP] " + ChatColor.GRAY + string;
+    public static Component toComponent(String legacyText) {
+        return LegacyComponentSerializer.legacySection().deserialize(legacyText);
     }
 
-    public static String getNoPermissionMessage() {
-        return formatCommandResponse(ChatColor.RED + "You don't have permission to do that.");
+    public static Component formatCommandResponse(String string) {
+        return Component.text("[FJP] ", NamedTextColor.YELLOW)
+                .append(Component.text(string, NamedTextColor.GRAY));
     }
 
+    public static Component getNoPermissionMessage() {
+        return Component.text("[FJP] ", NamedTextColor.YELLOW)
+                .append(Component.text("You don't have permission to do that.", NamedTextColor.RED));
+    }
+
+    @SuppressWarnings("deprecation")
     public static void copyDefaultFiles() {
         FirstJoinPlus.getInstance().getConfig().options().header("FirstJoinPlus Version " + FirstJoinPlus.getInstance().getDescription().getVersion() + " Configuration -- Configuration Help: http://dev.bukkit.org/bukkit-plugins/firstjoinplus/ #");
         FirstJoinPlus.getInstance().getConfig().options().copyDefaults(true);
-        FirstJoinPlus.getInstance().getConfig().options().copyHeader(true);
         FirstJoinPlus.getInstance().saveConfig();
 
         String[] files = new String[] { };
@@ -224,7 +237,7 @@ public class Utilities {
                     in.close();
                 }
             } catch (IOException ex) {
-
+                // ignore
             }
         }
     }
@@ -235,7 +248,8 @@ public class Utilities {
         player.getInventory().setChestplate(null);
         player.getInventory().setLeggings(null);
         player.getInventory().setBoots(null);
-        player.setHealth(player.getMaxHealth());
+        AttributeInstance maxHealthAttr = player.getAttribute(Attribute.MAX_HEALTH);
+        player.setHealth(maxHealthAttr != null ? maxHealthAttr.getValue() : 20.0);
         player.setAllowFlight(false);
         player.setFlying(false);
         player.setExhaustion(0);
@@ -247,7 +261,9 @@ public class Utilities {
         player.setGameMode(FirstJoinPlus.getInstance().getServer().getDefaultGameMode());
 
         if (b) {
-            FirstJoinPlus.getInstance().getServer().getPluginManager().callEvent(new FirstJoinEvent(new PlayerJoinEvent(player, player.getName() + " joined for the first time!")));
+            FirstJoinPlus.getInstance().getServer().getPluginManager().callEvent(
+                    new FirstJoinEvent(new PlayerJoinEvent(player,
+                            Component.text(player.getName() + " joined for the first time!"))));
         }
     }
 

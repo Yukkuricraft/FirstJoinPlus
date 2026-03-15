@@ -1,20 +1,22 @@
-name: ${plugin.name}
-main: ${plugin.groupID}.${plugin.name.lower}.${plugin.name}
-version: ${plugin.version}
-description: ${project.description}
+name: FirstJoinPlus
+main: com.chaseoes.firstjoinplus.FirstJoinPlus
+version: 2.4.1
+description: FirstJoinPlus by chaseoes.
+api-version: '1.21'
 author: chaseoes
-dev-url: http://dev.bukkit.org/server-mods/${plugin.name.lower}/
-website: http://dev.bukkit.org/server-mods/${plugin.name.lower}/
+website: http://dev.bukkit.org/server-mods/firstjoinplus/
 softdepend: [GeoIPTools]
 commands:
-  ${plugin.name.lower}:
-    description: ${plugin.name} command(s).
+  firstjoinplus:
+    description: FirstJoinPlus command(s).
     aliases: fjp
-    usage: /${plugin.name.lower} [reload|setspawn|debug]
+    usage: /firstjoinplus [reload|setspawn|debug]
 permissions:
-  ${plugin.name.lower}.reload:
-    description: Permission to use the /${plugin.name.lower} reload command.
-  ${plugin.name.lower}.setspawn:
-    description: Permission to use the /${plugin.name.lower} setspawn command.
-  ${plugin.name.lower}.debug:
-    description: Permission to use the /${plugin.name.lower} debug command.
+  firstjoinplus.reload:
+    description: Permission to use the /firstjoinplus reload command.
+  firstjoinplus.setspawn:
+    description: Permission to use the /firstjoinplus setspawn command.
+  firstjoinplus.debug:
+    description: Permission to use the /firstjoinplus debug command.
+  firstjoinplus.notify:
+    description: Permission to hear the first-join sound notification.

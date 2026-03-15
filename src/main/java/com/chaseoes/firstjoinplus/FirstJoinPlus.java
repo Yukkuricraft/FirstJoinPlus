@@ -1,31 +1,23 @@
 package com.chaseoes.firstjoinplus;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
-import net.gravitydevelopment.updater.Updater;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.mcstats.Metrics;
-
-import uk.org.whoami.geoip.GeoIPLookup;
-import uk.org.whoami.geoip.GeoIPTools;
 
 import com.chaseoes.firstjoinplus.utilities.Utilities;
 
 public class FirstJoinPlus extends JavaPlugin {
 
     private static FirstJoinPlus instance;
-    public String smile = "Girls with the prettiest smiles, have the saddest stories.";
 
     public List<String> noPVP = new ArrayList<String>();
     public List<String> godMode = new ArrayList<String>();
@@ -50,18 +42,7 @@ public class FirstJoinPlus extends JavaPlugin {
                 getConfig().set(s, null);
             }
             saveConfig();
-            getLogger().log(Level.SEVERE, "Your configuration was outdated, so we attempted to generate a new one for you.");
-        }
-
-        if (getConfig().getBoolean("settings.allow-automatic-updating")) {
-            new Updater(this, 37766, getFile(), Updater.UpdateType.DEFAULT, true);
-        }
-
-        try {
-            Metrics metrics = new Metrics(this);
-            metrics.start();
-        } catch (IOException e) {
-            // Failed to submit!
+            getLogger().severe("Your configuration was outdated, so we attempted to generate a new one for you.");
         }
     }
 
@@ -73,7 +54,10 @@ public class FirstJoinPlus extends JavaPlugin {
 
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] strings) {
         if (strings.length == 0) {
-            cs.sendMessage(ChatColor.YELLOW + "[FirstJoinPlus] " + ChatColor.GRAY + "Version " + ChatColor.AQUA + getDescription().getVersion() + ChatColor.GRAY + " by " + getDescription().getAuthors().get(0) + ".");
+            cs.sendMessage(Component.text("[FirstJoinPlus] ", NamedTextColor.YELLOW)
+                    .append(Component.text("Version ", NamedTextColor.GRAY))
+                    .append(Component.text(getDescription().getVersion(), NamedTextColor.AQUA))
+                    .append(Component.text(" by " + getDescription().getAuthors().get(0) + ".", NamedTextColor.GRAY)));
             cs.sendMessage(Utilities.formatCommandResponse("http://dev.bukkit.org/bukkit-plugins/firstjoinplus/"));
             return true;
         }
@@ -85,10 +69,10 @@ public class FirstJoinPlus extends JavaPlugin {
 
         if (strings[0].equalsIgnoreCase("help")) {
             cs.sendMessage(Utilities.formatCommandResponse("Available Commands:"));
-            cs.sendMessage(Utilities.formatCommandResponse(ChatColor.AQUA + "/fjp" + ChatColor.GRAY + ": General plugin information."));
-            cs.sendMessage(Utilities.formatCommandResponse(ChatColor.AQUA + "/fjp reload" + ChatColor.GRAY + ": Reloads the configuration."));
-            cs.sendMessage(Utilities.formatCommandResponse(ChatColor.AQUA + "/fjp setspawn" + ChatColor.GRAY + ": Sets the first-join spawnpoint."));
-            cs.sendMessage(Utilities.formatCommandResponse(ChatColor.AQUA + "/fjp debug" + ChatColor.GRAY + ": Become a new player!"));
+            cs.sendMessage(Utilities.formatCommandResponse("/fjp: General plugin information."));
+            cs.sendMessage(Utilities.formatCommandResponse("/fjp reload: Reloads the configuration."));
+            cs.sendMessage(Utilities.formatCommandResponse("/fjp setspawn: Sets the first-join spawnpoint."));
+            cs.sendMessage(Utilities.formatCommandResponse("/fjp debug: Become a new player!"));
             return true;
         }
 
@@ -137,16 +121,8 @@ public class FirstJoinPlus extends JavaPlugin {
             return true;
         }
 
-        cs.sendMessage(Utilities.formatCommandResponse("Unknown command. Type " + ChatColor.AQUA + "/fjp help" + ChatColor.GRAY + " for help."));
+        cs.sendMessage(Utilities.formatCommandResponse("Unknown command. Type /fjp help for help."));
         return true;
-    }
-
-    public GeoIPLookup getGeoIPLookup() {
-        Plugin pl = getServer().getPluginManager().getPlugin("GeoIPTools");
-        if (pl != null) {
-            return ((GeoIPTools) pl).getGeoIPLookup();
-        }
-        return null;
     }
 
 }

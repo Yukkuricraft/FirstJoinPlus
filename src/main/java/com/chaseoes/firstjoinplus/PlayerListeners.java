@@ -1,5 +1,7 @@
 package com.chaseoes.firstjoinplus;
 
+import net.kyori.adventure.text.Component;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -56,9 +58,9 @@ public class PlayerListeners implements Listener {
             if (event.getPlayer().hasPlayedBefore() || (!FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.first-join-message.enabled") && !event.getPlayer().hasPlayedBefore())) {
                 String message = FirstJoinPlus.getInstance().getConfig().getString("other-messages.join-message.message");
                 if (!message.equalsIgnoreCase("%none")) {
-                    event.setJoinMessage(Utilities.replaceVariables(message, event.getPlayer()));
+                    event.joinMessage(Utilities.toComponent(Utilities.replaceVariables(message, event.getPlayer())));
                 } else {
-                    event.setJoinMessage(null);
+                    event.joinMessage(Component.empty());
                 }
             }
         }
@@ -69,9 +71,9 @@ public class PlayerListeners implements Listener {
         if (FirstJoinPlus.getInstance().getConfig().getBoolean("other-messages.quit-message.enabled")) {
             String message = FirstJoinPlus.getInstance().getConfig().getString("other-messages.quit-message.message");
             if (!message.equalsIgnoreCase("%none")) {
-                event.setQuitMessage(Utilities.replaceVariables(message, event.getPlayer()));
+                event.quitMessage(Utilities.toComponent(Utilities.replaceVariables(message, event.getPlayer())));
             } else {
-                event.setQuitMessage(null);
+                event.quitMessage(Component.empty());
             }
         }
     }
@@ -81,9 +83,9 @@ public class PlayerListeners implements Listener {
         if (FirstJoinPlus.getInstance().getConfig().getBoolean("other-messages.kick-message.enabled")) {
             String message = FirstJoinPlus.getInstance().getConfig().getString("other-messages.kick-message.message");
             if (!message.equalsIgnoreCase("%none")) {
-                event.setLeaveMessage(Utilities.replaceVariables(message, event.getPlayer(), event.getReason()));
+                event.leaveMessage(Utilities.toComponent(Utilities.replaceVariables(message, event.getPlayer(), event.getReason())));
             } else {
-                event.setLeaveMessage(null);
+                event.leaveMessage(Component.empty());
             }
         }
     }

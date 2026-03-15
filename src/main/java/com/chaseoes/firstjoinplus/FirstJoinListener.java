@@ -3,8 +3,9 @@ package com.chaseoes.firstjoinplus;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import org.bukkit.Effect;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -49,7 +50,7 @@ public class FirstJoinListener implements Listener {
 
                 if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.send-messages.enabled")) {
                     for (String message : FirstJoinPlus.getInstance().getConfig().getStringList("on-first-join.send-messages.messages")) {
-                        player.sendMessage(Utilities.replaceVariables(message, player));
+                        player.sendMessage(Utilities.toComponent(Utilities.replaceVariables(message, player)));
                     }
                 }
 
@@ -63,9 +64,7 @@ public class FirstJoinListener implements Listener {
                 }
 
                 if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.fun-stuff.smoke-effect.enabled")) {
-                    for (int i = 0; i <= 25; i++) {
-                        event.getFirstJoinLocation().getWorld().playEffect(event.getFirstJoinLocation(), Effect.SMOKE, i);
-                    }
+                    event.getFirstJoinLocation().getWorld().spawnParticle(Particle.SMOKE, event.getFirstJoinLocation(), 25);
                 }
 
                 if (FirstJoinPlus.getInstance().getConfig().getBoolean("on-first-join.fun-stuff.launch-firework.enabled")) {
@@ -90,7 +89,12 @@ public class FirstJoinListener implements Listener {
                     List<PotionEffect> effects = new ArrayList<PotionEffect>();
                     for (String s : FirstJoinPlus.getInstance().getConfig().getStringList("on-first-join.apply-potion-effects.effects")) {
                         String[] effect = s.split("\\:");
-                        effects.add(new PotionEffect(PotionEffectType.getByName(effect[0].toUpperCase()), Integer.parseInt(effect[2]) * 20, (Integer.parseInt(effect[1])) - 1));
+                        PotionEffectType type = Registry.EFFECT.get(NamespacedKey.minecraft(effect[0].toLowerCase()));
+                        if (type != null) {
+                            effects.add(new PotionEffect(type, Integer.parseInt(effect[2]) * 20, (Integer.parseInt(effect[1])) - 1));
+                        } else {
+                            FirstJoinPlus.getInstance().getLogger().warning("Unknown potion effect type: " + effect[0]);
+                        }
                     }
                     player.addPotionEffects(effects);
                 }

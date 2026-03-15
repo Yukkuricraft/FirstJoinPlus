@@ -1,5 +1,7 @@
 package com.chaseoes.firstjoinplus;
 
+import net.kyori.adventure.text.Component;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -30,7 +32,7 @@ public class FirstJoinEvent extends Event {
     }
 
     public void setFirstJoinMessage(String message) {
-        e.setJoinMessage(message);
+        e.joinMessage(Utilities.toComponent(message));
     }
 
     public Location getFirstJoinLocation() {
